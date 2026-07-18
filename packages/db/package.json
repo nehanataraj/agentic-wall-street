@@ -1,0 +1,35 @@
+{
+  "name": "@app/db",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./dist/index.js",
+    "./schema": "./dist/schema/index.js",
+    "./client": "./dist/client.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "migrate": "drizzle-kit migrate --config drizzle.config.ts",
+    "migrate:create": "drizzle-kit generate --config drizzle.config.ts",
+    "push": "drizzle-kit push --config drizzle.config.ts",
+    "roles": "tsx src/scripts/apply-roles.ts",
+    "test:db": "vitest run --config vitest.config.ts src/__tests__/db-privileges.test.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "drizzle-orm": "^0.44.2",
+    "pg": "^8.13.0",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.11.10",
+    "drizzle-kit": "^0.31.4",
+    "tsx": "^4.19.0",
+    "typescript": "^5.5.0",
+    "vitest": "^3.2.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.0"
+  }
+}

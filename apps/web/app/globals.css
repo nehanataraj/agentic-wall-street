@@ -1,0 +1,227 @@
+@import "tailwindcss";
+
+:root {
+  --ink: #0d0d0d;
+  --paper: #f5f2eb;
+  --rule: #c8bfa4;
+  --muted: #8a8070;
+  --accent: #1a3a2a;
+  --accent-light: #2d6147;
+  --danger: #7a1c1c;
+  --positive: #1c5c2e;
+  --column-max: 72ch;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  background: var(--paper);
+  color: var(--ink);
+}
+
+body {
+  font-family: "EB Garamond", Georgia, "Times New Roman", serif;
+  font-size: 1rem;
+  line-height: 1.65;
+  background: var(--paper);
+  color: var(--ink);
+  margin: 0;
+}
+
+/* Newspaper grid */
+.masthead {
+  border-top: 4px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  padding: 1.25rem 0 0.75rem;
+  text-align: center;
+}
+
+.masthead h1 {
+  font-family: "UnifrakturMaguntia", "IM Fell English SC", Georgia, serif;
+  font-size: clamp(2rem, 6vw, 4rem);
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  margin: 0;
+  line-height: 1;
+}
+
+.masthead .dateline {
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 0.75rem;
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  margin-top: 0.5rem;
+}
+
+/* Layout columns */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.two-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2rem;
+  border-top: 1px solid var(--rule);
+  padding-top: 1.5rem;
+}
+
+.three-col {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 1.5rem;
+}
+
+/* Rule dividers */
+hr.rule {
+  border: none;
+  border-top: 1px solid var(--rule);
+  margin: 1.5rem 0;
+}
+
+hr.rule-heavy {
+  border: none;
+  border-top: 2px solid var(--ink);
+  margin: 1.5rem 0;
+}
+
+/* Typography */
+h2, h3, h4 {
+  font-family: "EB Garamond", Georgia, serif;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.mono {
+  font-family: "Courier Prime", "Courier New", monospace;
+  font-size: 0.85em;
+}
+
+.caption {
+  font-size: 0.8rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+/* Score badges */
+.badge {
+  display: inline-block;
+  font-family: "Courier Prime", monospace;
+  font-size: 0.75rem;
+  padding: 0.1em 0.4em;
+  border-radius: 2px;
+  letter-spacing: 0.04em;
+}
+
+.badge-skill   { background: #d4edda; color: var(--positive); }
+.badge-luck    { background: #fff3cd; color: #7a5c00; }
+.badge-wrong   { background: #f8d7da; color: var(--danger); }
+.badge-pending { background: #e9ecef; color: var(--muted); }
+
+/* Claim card */
+.claim-card {
+  border-left: 3px solid var(--rule);
+  padding: 0.75rem 0 0.75rem 1rem;
+}
+
+.claim-card + .claim-card {
+  border-top: 1px solid var(--rule);
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+}
+
+.claim-card .instrument {
+  font-family: "Courier Prime", monospace;
+  font-size: 0.85rem;
+  font-weight: bold;
+  letter-spacing: 0.06em;
+}
+
+.claim-card .direction-up   { color: var(--positive); }
+.claim-card .direction-down { color: var(--danger); }
+
+/* Leaderboard table */
+.leaderboard-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+}
+
+.leaderboard-table th {
+  font-family: "Courier Prime", monospace;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 2px solid var(--ink);
+  padding: 0.5rem 0.75rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.leaderboard-table td {
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--rule);
+  font-variant-numeric: tabular-nums;
+}
+
+.leaderboard-table tr:hover td {
+  background: rgba(0,0,0,0.02);
+}
+
+/* Confidence bar */
+.conf-bar {
+  display: inline-block;
+  height: 6px;
+  background: var(--accent);
+  border-radius: 2px;
+  vertical-align: middle;
+}
+
+/* Navigation */
+nav {
+  border-bottom: 1px solid var(--ink);
+  font-family: "Courier Prime", monospace;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+nav a {
+  color: var(--ink);
+  text-decoration: none;
+  padding: 0.5rem 1rem;
+  display: inline-block;
+}
+
+nav a:hover { text-decoration: underline; }
+
+/* Methodology page */
+.prose {
+  max-width: var(--column-max);
+}
+
+.prose h2 {
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.25rem;
+  margin-top: 2rem;
+}
+
+.disclosure-box {
+  border: 1px solid var(--rule);
+  border-left: 4px solid var(--muted);
+  background: rgba(0,0,0,0.02);
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  font-size: 0.875rem;
+  color: var(--ink);
+}
+
+@media (max-width: 760px) {
+  .two-col, .three-col { grid-template-columns: 1fr; }
+}

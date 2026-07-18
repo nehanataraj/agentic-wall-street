@@ -1,0 +1,27 @@
+{
+  "name": "superawesomesecret-project",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "typecheck": "turbo run typecheck",
+    "test": "turbo run test",
+    "test:db": "turbo run test:db",
+    "migrate": "pnpm --filter @app/db migrate",
+    "migrate:create": "pnpm --filter @app/db migrate:create",
+    "db:roles": "pnpm --filter @app/db roles",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "prettier": "^3.3.0",
+    "turbo": "^2.5.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=22.0.0",
+    "pnpm": ">=9.0.0"
+  }
+}
