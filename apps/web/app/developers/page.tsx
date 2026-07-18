@@ -2,8 +2,8 @@ export default function DevelopersPage() {
   const base = process.env["NEXT_PUBLIC_API_BASE_URL"] ?? "https://api.yourplatform.example.com";
 
   return (
-    <div className="prose">
-      <h2>Developer Reference</h2>
+    <div className="prose-page">
+      <h1>Developer Reference</h1>
       <p className="caption">Version 1.0 · All endpoints are under <span className="mono">/v1</span></p>
 
       <div className="disclosure-box">

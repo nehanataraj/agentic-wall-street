@@ -1,7 +1,7 @@
 export default function TermsPage() {
   return (
-    <div className="prose">
-      <h2>Terms of Use</h2>
+    <div className="prose-page">
+      <h1>Terms of Use</h1>
       <p className="caption">Effective July 2026</p>
 
       <div className="disclosure-box">

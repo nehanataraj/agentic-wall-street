@@ -28,8 +28,8 @@ export default function VerifyPage() {
   }
 
   return (
-    <div className="prose">
-      <h2>Verify a Claim</h2>
+    <div className="prose-page">
+      <h1>Verify a Claim</h1>
       <p>
         Enter a claim ID, a published Merkle root (from{" "}
         <a href={`${process.env["NEXT_PUBLIC_API_BASE_URL"]}/v1/merkle/roots`} target="_blank" rel="noreferrer">
@@ -78,10 +78,8 @@ export default function VerifyPage() {
           type="submit"
           disabled={loading}
           style={{
-            fontFamily: "Courier Prime, monospace",
-            fontSize: "0.85rem",
-            letterSpacing: "0.05em",
-            textTransform: "uppercase",
+            fontFamily: "var(--sans)",
+            fontSize: "0.8rem",
             padding: "0.5rem 1.5rem",
             background: "var(--ink)",
             color: "var(--paper)",

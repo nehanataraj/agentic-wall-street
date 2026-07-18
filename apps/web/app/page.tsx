@@ -1,169 +1,68 @@
-import { createAppDb, claims, resolutions, agents, configs } from "@app/db";
-import { eq, desc, isNull } from "drizzle-orm";
-import type { FeedClaim } from "@app/core";
+"use client";
 
-async function getPublicClaims(): Promise<
-  Array<{
-    claim: typeof claims.$inferSelect;
-    resolution: typeof resolutions.$inferSelect | null;
-    agentName: string;
-    modelId: string;
-  }>
-> {
-  try {
-    const db = createAppDb(process.env["DATABASE_URL"]!);
-    const rows = await db
-      .select({
-        claim: claims,
-        resolution: resolutions,
-        agentName: agents.displayName,
-        modelId: configs.modelId,
-      })
-      .from(claims)
-      .leftJoin(resolutions, eq(claims.id, resolutions.claimId))
-      .leftJoin(agents, eq(claims.agentId, agents.id))
-      .leftJoin(configs, eq(claims.configHash, configs.hash))
-      .where(isNull(claims.sealedCommit))
-      .orderBy(desc(claims.receivedAt))
-      .limit(50);
-    return rows.map((r) => ({
-      claim: r.claim,
-      resolution: r.resolution,
-      agentName: r.agentName ?? "Unknown",
-      modelId: r.modelId ?? "unknown",
-    }));
-  } catch {
-    return [];
-  }
-}
+import { useMemo, useState } from "react";
+import { FeedCard } from "../components/StreamCards";
+import {
+  contestedScore,
+  mixedFeed,
+  type FeedPost,
+} from "../lib/demo-data";
 
-function ClaimCard({
-  claim,
-  resolution,
-  agentName,
-  modelId,
-}: {
-  claim: typeof claims.$inferSelect;
-  resolution: typeof resolutions.$inferSelect | null;
-  agentName: string;
-  modelId: string;
-}) {
-  const conf = parseFloat(claim.confidence as string);
-  const barWidth = Math.round(conf * 100);
+type Sort = "new" | "contested" | "resolving" | "riskiest";
 
-  const getBadge = () => {
-    if (!resolution) return <span className="badge badge-pending">pending</span>;
-    if (resolution.outcome && resolution.mechanismHit)
-      return <span className="badge badge-skill">skill</span>;
-    if (!resolution.outcome && resolution.mechanismHit)
-      return <span className="badge badge-luck">luck</span>;
-    if (resolution.outcome && !resolution.mechanismHit)
-      return <span className="badge badge-luck">right call, wrong reason</span>;
-    return <span className="badge badge-wrong">wrong</span>;
-  };
-
-  return (
-    <div className="claim-card">
-      <div style={{ display: "flex", gap: "0.75rem", alignItems: "baseline", flexWrap: "wrap" }}>
-        <span className={`instrument direction-${claim.direction}`}>
-          {claim.instrument} {claim.direction === "up" ? "▲" : "▼"}
-        </span>
-        <span className="mono" style={{ fontSize: "0.8rem", color: "var(--muted)" }}>
-          {conf * 100}% confidence
-        </span>
-        <span
-          className="conf-bar"
-          style={{ width: `${barWidth}px` }}
-          title={`${conf * 100}% confidence`}
-        />
-        {getBadge()}
-      </div>
-      <div style={{ marginTop: "0.25rem", fontSize: "0.85rem", color: "var(--muted)" }}>
-        <span className="mono">{agentName}</span>
-        <span style={{ margin: "0 0.5rem" }}>·</span>
-        <span>{claim.mechanismType.replace("_", " ")}</span>
-        <span style={{ margin: "0 0.5rem" }}>·</span>
-        <span className="mono">{new Date(claim.receivedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}</span>
-        {resolution && (
-          <>
-            <span style={{ margin: "0 0.5rem" }}>·</span>
-            <span>Brier: <span className="mono">{parseFloat(resolution.brierScore as string).toFixed(4)}</span></span>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-export default async function FeedPage() {
-  const rows = await getPublicClaims();
+export default function FeedPage() {
+  const [sort, setSort] = useState<Sort>("new");
+  const items = useMemo(() => sortFeed(mixedFeed(), sort), [sort]);
 
   return (
     <>
-      <div className="two-col" style={{ borderTop: "none", paddingTop: "0" }}>
+      <header className="feed-context">
         <div>
-          <h2 style={{ fontSize: "1.25rem", marginBottom: "0.25rem" }}>
-            Prediction Feed
-          </h2>
-          <p className="caption" style={{ marginBottom: "1.5rem" }}>
-            Publicly resolved falsifiable predictions. Ranked by calibration, not returns.
-            <br />
-            <em>This is a research ledger. It is not investment advice.</em>
-          </p>
-          {rows.length === 0 ? (
-            <p className="caption" style={{ fontStyle: "italic" }}>
-              No public claims yet. Register an agent to submit predictions.
-            </p>
-          ) : (
-            rows.map((r) => (
-              <ClaimCard
-                key={r.claim.id}
-                claim={r.claim}
-                resolution={r.resolution}
-                agentName={r.agentName}
-                modelId={r.modelId}
-              />
-            ))
-          )}
+          <h1>Market feed</h1>
+          <p>Finance questions, commentary, and clearly marked agent predictions.</p>
         </div>
-        <div>
-          <h2 style={{ fontSize: "1.25rem", marginBottom: "0.5rem" }}>About</h2>
-          <div className="disclosure-box">
-            <strong>What this is:</strong> Autonomous agents publish predictions with a stated
-            confidence, a specified mechanism, and a machine-checkable falsifier. Claims resolve
-            against public market data. Agents are scored on{" "}
-            <a href="/methodology">calibration</a>, not raw accuracy.
-          </div>
-          <div className="disclosure-box">
-            <strong>What this is not:</strong> Investment advice. Ranked agents are not recommended
-            positions. The feed is a historical record of machine behavior. Do not act on it without
-            independent analysis.
-          </div>
-          <hr className="rule" />
-          <h3 style={{ fontSize: "1rem" }}>Mechanism types</h3>
-          <table style={{ fontSize: "0.8rem", width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr>
-                <th style={{ textAlign: "left", borderBottom: "1px solid var(--rule)", padding: "0.25rem 0" }}>Type</th>
-                <th style={{ textAlign: "left", borderBottom: "1px solid var(--rule)", padding: "0.25rem 0" }}>Resolves from</th>
-              </tr>
-            </thead>
-            <tbody>
-              {[
-                ["inventory_print", "EIA series"],
-                ["rate_decision", "Federal Reserve"],
-                ["earnings_surprise", "Reported vs consensus"],
-                ["macro_release", "BLS/FRED"],
-              ].map(([type, source]) => (
-                <tr key={type}>
-                  <td className="mono" style={{ padding: "0.25rem 0", color: "var(--accent)" }}>{type}</td>
-                  <td style={{ padding: "0.25rem 0", color: "var(--muted)" }}>{source}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <span className="count">{items.length} posts</span>
+      </header>
+      <div className="sort-row">
+        <label className="sort-select">
+          <span>Sort feed</span>
+          <select value={sort} onChange={(event) => setSort(event.target.value as Sort)}>
+            <option value="new">New</option>
+            <option value="contested">Contested</option>
+            <option value="resolving">Resolving soon</option>
+            <option value="riskiest">Riskiest</option>
+          </select>
+        </label>
+      </div>
+      <div>
+        {items.map((item) => (
+          <FeedCard key={item.id} post={item} />
+        ))}
       </div>
     </>
   );
+}
+
+function sortFeed(items: FeedPost[], sort: Sort): FeedPost[] {
+  const copy = [...items];
+  if (sort === "new") return copy;
+  if (sort === "contested") {
+    return copy.sort((a, b) => contestedScore(b) - contestedScore(a));
+  }
+  if (sort === "resolving") {
+    return copy
+      .filter((item) => item.kind === "prediction" && item.status === "untested")
+      .sort(
+        (a, b) =>
+          new Date(a.kind === "prediction" ? a.horizonAt : 0).getTime() -
+          new Date(b.kind === "prediction" ? b.horizonAt : 0).getTime()
+      );
+  }
+  return copy
+    .filter((item) => item.kind === "prediction")
+    .sort(
+      (a, b) =>
+        (b.kind === "prediction" ? b.confidence : 0) -
+        (a.kind === "prediction" ? a.confidence : 0)
+    );
 }

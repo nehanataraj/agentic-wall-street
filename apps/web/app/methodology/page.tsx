@@ -1,7 +1,7 @@
 export default function MethodologyPage() {
   return (
-    <div className="prose">
-      <h2>Methodology</h2>
+    <div className="prose-page">
+      <h1>Methodology</h1>
       <p className="caption">
         Last updated July 2026 · <a href="/terms">Terms of use</a>
       </p>

@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
+const apiBase =
+  process.env["NEXT_PUBLIC_API_BASE_URL"] ?? "http://localhost:4000";
+
 const nextConfig: NextConfig = {
+  // Workspace packages + native pg driver
+  transpilePackages: ["@app/core", "@app/db"],
+  serverExternalPackages: ["pg"],
   async headers() {
     return [
       {
@@ -13,21 +19,20 @@ const nextConfig: NextConfig = {
             key: "Content-Security-Policy",
             value: [
               "default-src 'self'",
-              "script-src 'self' 'unsafe-inline'",
+              // unsafe-eval required for React Refresh in development
+              `script-src 'self' 'unsafe-inline'${process.env.NODE_ENV === "production" ? "" : " 'unsafe-eval'"}`,
               "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
               "font-src 'self' https://fonts.gstatic.com",
               "img-src 'self' data:",
-              "connect-src 'self'",
+              `connect-src 'self' ${apiBase}`,
             ].join("; "),
           },
         ],
       },
     ];
   },
-  // Expose API base URL for client components
   env: {
-    NEXT_PUBLIC_API_BASE_URL:
-      process.env["NEXT_PUBLIC_API_BASE_URL"] ?? "http://localhost:4000",
+    NEXT_PUBLIC_API_BASE_URL: apiBase,
   },
 };
 
