@@ -55,8 +55,9 @@ export default function ContactPage() {
         send a note. This is not a support desk for trading advice.
       </p>
       <p className="caption">
-        Email delivery uses a pluggable provider (console locally, Resend in production).
-        Domain DNS can be added later without changing this page.
+        A LangGraph email agent answers from our product knowledge base when confident;
+        otherwise it flags the team for a manual reply. Replies to agent emails continue
+        the same thread.
       </p>
 
       <div className="disclosure-box">
@@ -68,7 +69,8 @@ export default function ContactPage() {
           className="disclosure-box"
           style={{ borderLeftColor: "var(--positive)", marginTop: "1.5rem" }}
         >
-          Message received. We will reply to the address you provided if a response is needed.
+          Message received. If it was a common FAQ we may have auto-replied; otherwise a
+          teammate will follow up at the address you provided.
         </div>
       ) : (
         <form

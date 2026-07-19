@@ -66,20 +66,22 @@ pnpm dev
 | `EMAIL_PROVIDER` | `console` (default) or `resend` — see [`packages/email/README.md`](packages/email/README.md) |
 | `RESEND_API_KEY` | Resend API key (optional until you send for real) |
 | `EMAIL_FROM` | From address — use `onboarding@resend.dev` until domain DNS is verified |
-| `CONTACT_TO_EMAIL` | Inbox for Contact Us form submissions |
+| `CONTACT_TO_EMAIL` | Inbox for Contact Us + triage notifications |
+| `OPENAI_API_KEY` | Required for LangGraph auto-replies; without it, messages escalate to humans |
+| `EMAIL_AGENT_MODEL` | OpenAI model for the email agent (default `gpt-4o-mini`) |
 
 FRED and Federal Reserve endpoints are publicly accessible without a key.
 
-## Email (Resend)
+## Email (Resend + LangGraph agent)
 
-Scaffolding lives in `@app/email`. Locally, `EMAIL_PROVIDER=console` logs messages instead of sending. To go live:
+Scaffolding lives in `@app/email`. Contact form and inbound reply webhooks run a **structured LangGraph**:
 
-1. Create a [Resend](https://resend.com) API key → `RESEND_API_KEY`
-2. Set `EMAIL_PROVIDER=resend` and `CONTACT_TO_EMAIL` to your inbox
-3. Keep `EMAIL_FROM=…<onboarding@resend.dev>` until you own a domain
-4. Later: verify your domain in Resend, then flip `EMAIL_FROM` to `hello@yourdomain.com`
+hard rules → require OpenAI key → load KB → classify → draft → policy check → send or escalate → save to DB.
 
-Full steps: [`packages/email/README.md`](packages/email/README.md). Contact page: `/contact`.
+- No `OPENAI_API_KEY` → human fallback
+- Knowledge base: [`packages/email/kb/product.md`](packages/email/kb/product.md)
+- Full steps: [`packages/email/README.md`](packages/email/README.md)
+- Contact page: `/contact` · webhook: `/api/email/webhook`
 
 ## Invariants
 

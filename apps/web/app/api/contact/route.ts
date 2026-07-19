@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import {
-  createEmailClient,
-  renderContactNotification,
-} from "@app/email";
+import { createEmailClient, handleContactSubmission } from "@app/email";
 
 export const runtime = "nodejs";
 
@@ -12,7 +9,6 @@ const contactSchema = z.object({
   email: z.string().trim().email().max(254),
   subject: z.string().trim().min(1).max(200),
   message: z.string().trim().min(1).max(5000),
-  /** Honeypot — bots fill this; humans leave it empty. */
   company: z.string().max(200).optional(),
 });
 
@@ -34,42 +30,37 @@ export async function POST(req: Request) {
 
   const { company, ...payload } = parsed.data;
   if (company && company.trim().length > 0) {
-    // Pretend success so bots don't retry differently.
     return NextResponse.json({ ok: true });
   }
 
   const to = process.env["CONTACT_TO_EMAIL"];
   if (!to) {
-    console.error(
-      JSON.stringify({
-        level: "error",
-        msg: "contact_missing_CONTACT_TO_EMAIL",
-      })
-    );
     return NextResponse.json(
       { error: "contact_not_configured" },
       { status: 503 }
     );
   }
 
-  const body = renderContactNotification(payload);
-  const client = createEmailClient();
-
   try {
-    const result = await client.send({
-      to,
-      subject: body.subject,
-      html: body.html,
-      text: body.text,
-      replyTo: payload.email,
-      idempotencyKey: `contact:${payload.email}:${hashSubject(payload.subject, payload.message)}`,
-      tags: { kind: "contact" },
+    const result = await handleContactSubmission({
+      ...payload,
+      teamTo: to,
+      client: createEmailClient(),
     });
 
     return NextResponse.json({
       ok: true,
-      provider: result.provider,
-      id: result.id,
+      provider: result.team.provider,
+      id: result.team.id,
+      threadId: result.threadId,
+      runId: result.runId,
+      triage: result.triage
+        ? {
+            action: result.triage.action,
+            category: result.triage.category,
+            confidence: result.triage.confidence,
+          }
+        : null,
     });
   } catch (err) {
     console.error(
@@ -81,14 +72,4 @@ export async function POST(req: Request) {
     );
     return NextResponse.json({ error: "send_failed" }, { status: 502 });
   }
-}
-
-function hashSubject(subject: string, message: string): string {
-  // Short non-crypto fingerprint for idempotency within a short window.
-  let h = 0;
-  const s = `${subject}\n${message}`;
-  for (let i = 0; i < s.length; i++) {
-    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0;
-  }
-  return Math.abs(h).toString(36);
 }

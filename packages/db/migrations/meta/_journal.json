@@ -8,6 +8,13 @@
       "when": 1784338263717,
       "tag": "0000_aromatic_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784480000000,
+      "tag": "0001_email_agent",
+      "breakpoints": true
     }
   ]
 }

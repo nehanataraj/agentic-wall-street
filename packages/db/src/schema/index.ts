@@ -249,3 +249,70 @@ export const oauthTokens = opSchema.table("oauth_tokens", {
   expiresAt: timestamptz("expires_at").notNull(),
   revokedAt: timestamptz("revoked_at"),
 });
+
+// ─── email agent (ops — mutable status for human review queue) ───────────────
+
+export const emailThreadStatusEnum = pgEnum("email_thread_status", [
+  "open",
+  "needs_human",
+  "auto_replied",
+  "closed",
+]);
+
+export const emailAgentActionEnum = pgEnum("email_agent_action", [
+  "auto_reply",
+  "escalate",
+]);
+
+export const emailMessageDirectionEnum = pgEnum("email_message_direction", [
+  "inbound_form",
+  "inbound_email",
+  "outbound_agent",
+  "outbound_ack",
+  "outbound_team",
+]);
+
+export const emailThreads = opSchema.table("email_threads", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  contactEmail: text("contact_email").notNull(),
+  contactName: text("contact_name"),
+  subject: text("subject").notNull(),
+  status: emailThreadStatusEnum("status").notNull().default("open"),
+  /** Resend / provider id of the last agent outbound message (for In-Reply-To matching). */
+  lastOutboundProviderId: text("last_outbound_provider_id"),
+  createdAt: timestamptz("created_at").notNull().default(sql`now()`),
+  updatedAt: timestamptz("updated_at").notNull().default(sql`now()`),
+});
+
+export const emailAgentRuns = opSchema.table("email_agent_runs", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadId: uuid("thread_id")
+    .notNull()
+    .references(() => emailThreads.id),
+  source: text("source").notNull(), // form | inbound
+  model: text("model"),
+  action: emailAgentActionEnum("action").notNull(),
+  category: text("category"),
+  confidence: numeric("confidence", { precision: 5, scale: 4 }),
+  reasoning: text("reasoning"),
+  draftSubject: text("draft_subject"),
+  draftBody: text("draft_body"),
+  kbVersion: text("kb_version"),
+  hardRuleHit: text("hard_rule_hit"),
+  teamProviderId: text("team_provider_id"),
+  userProviderId: text("user_provider_id"),
+  createdAt: timestamptz("created_at").notNull().default(sql`now()`),
+});
+
+export const emailMessages = opSchema.table("email_messages", {
+  id: uuid("id").primaryKey().default(sql`gen_random_uuid()`),
+  threadId: uuid("thread_id")
+    .notNull()
+    .references(() => emailThreads.id),
+  runId: uuid("run_id").references(() => emailAgentRuns.id),
+  direction: emailMessageDirectionEnum("direction").notNull(),
+  providerMessageId: text("provider_message_id"),
+  subject: text("subject"),
+  bodyText: text("body_text"),
+  createdAt: timestamptz("created_at").notNull().default(sql`now()`),
+});

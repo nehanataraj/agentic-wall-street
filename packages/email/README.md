@@ -1,74 +1,64 @@
 # @app/email
 
-Provider-agnostic outbound email layer. Local default is **console** (logs only). Swap to **Resend** when you have an API key — and later a verified domain — without changing call sites.
+Outbound email + **LangGraph contact agent** (structured graph, not a free-roaming agent).
 
-## Setup Resend
+## Behavior
 
-### 1. Create an account
-1. Sign up at [https://resend.com](https://resend.com)
-2. Create an API key (Dashboard → API Keys)
-3. Put it in `.env` as `RESEND_API_KEY`
+```
+hard_rules → require_llm_key → load_kb → classify → draft → policy_check → send|escalate → persist
+```
 
-### 2. Send without a custom domain (now)
-Resend lets you send from their onboarding address while prototyping:
+- **No `OPENAI_API_KEY`** → escalate to human (team email + user ack)
+- **Hard rules** (security/secrets/legal/privacy) → escalate, never auto-reply
+- **Confident + KB-grounded** → LLM drafts and sends auto-reply
+- **Unsure** → escalate (`[NEEDS MANUAL REPLY]` to `CONTACT_TO_EMAIL`)
+- Every run is stored in Postgres (`op.email_threads`, `op.email_agent_runs`, `op.email_messages`)
+- Inbound replies (Resend webhook) continue the same thread
+
+## Setup
 
 ```bash
-EMAIL_PROVIDER=resend
-RESEND_API_KEY=re_xxxxxxxx
-EMAIL_FROM="Prediction Ledger <onboarding@resend.dev>"
-CONTACT_TO_EMAIL=you@your-personal-email.com
+EMAIL_PROVIDER=console          # or resend
+RESEND_API_KEY=
+EMAIL_FROM=Prediction Ledger <onboarding@resend.dev>
+CONTACT_TO_EMAIL=you@gmail.com
+OPENAI_API_KEY=sk-...           # required for LLM auto-replies
+EMAIL_AGENT_MODEL=gpt-4o-mini
+CONTACT_AUTO_REPLY_MIN_CONFIDENCE=0.75
+RESEND_WEBHOOK_SECRET=          # set in production
 ```
 
-With `EMAIL_PROVIDER=console` (default), no key is required — submissions are logged in the API/server console.
+Knowledge base: [`kb/product.md`](./kb/product.md) — edit this file to teach the agent.
 
-### 3. Add your domain later
-When you buy a domain:
+### Resend inbound (thread replies)
 
-1. Resend Dashboard → **Domains** → **Add Domain**
-2. Add the DNS records they show (SPF + DKIM; optionally DMARC)
-3. Wait until status is **Verified**
-4. Change only env:
+1. Enable inbound / receiving in Resend (or forward replies to their inbound address)
+2. Webhook URL: `https://your-host/api/email/webhook`
+3. Subscribe to `email.received` (and delivery events if desired)
+
+Local stub:
 
 ```bash
-EMAIL_FROM="Prediction Ledger <hello@yourdomain.com>"
-EMAIL_REPLY_TO=hello@yourdomain.com
+curl -X POST http://localhost:3000/api/email/webhook \
+  -H 'content-type: application/json' \
+  -d '{
+    "type": "email.received",
+    "data": {
+      "from": "user@example.com",
+      "subject": "Re: How does scoring work?",
+      "text": "Thanks — can you also point me to developers docs?",
+      "in_reply_to": "PROVIDER_ID_FROM_PRIOR_OUTBOUND"
+    }
+  }'
 ```
 
-No code changes required.
+### Domain later
 
-### 4. Optional webhook (later)
-Stub route: `POST /api/email/webhook`  
-Wire Resend event webhooks there for delivery / bounce / complaint tracking once you care about deliverability metrics.
+Keep `onboarding@resend.dev` until you verify your domain, then change only `EMAIL_FROM`.
 
-## Usage
+## Migrate
 
-```ts
-import { createEmailClient, renderContactNotification } from "@app/email";
-
-const email = createEmailClient();
-const body = renderContactNotification({
-  name: "Ada",
-  email: "ada@example.com",
-  subject: "Hello",
-  message: "…",
-});
-
-await email.send({
-  to: process.env.CONTACT_TO_EMAIL!,
-  subject: body.subject,
-  html: body.html,
-  text: body.text,
-  replyTo: "ada@example.com",
-  tags: { kind: "contact" },
-});
+```bash
+pnpm migrate
+pnpm db:roles
 ```
-
-## Env vars
-
-| Variable | Description |
-|---|---|
-| `EMAIL_PROVIDER` | `console` (default) or `resend` |
-| `RESEND_API_KEY` | Resend secret key |
-| `EMAIL_FROM` | From header; use `onboarding@resend.dev` until domain is verified |
-| `EMAIL_REPLY_TO` | Optional default Reply-To |
-| `CONTACT_TO_EMAIL` | Inbox that receives Contact Us submissions |
