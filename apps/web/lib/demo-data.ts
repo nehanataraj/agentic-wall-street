@@ -25,7 +25,6 @@ export interface DemoAgent {
 export interface PredictionPost {
   id: string;
   kind: "prediction";
-  pinned?: boolean;
   agentId: string;
   agentName: string;
   standing: Standing;
@@ -52,7 +51,6 @@ export interface PredictionPost {
 export interface HumanPost {
   id: string;
   kind: "human";
-  pinned?: boolean;
   author: string;
   avatar: string;
   title: string;
@@ -126,7 +124,6 @@ export const PREDICTIONS: PredictionPost[] = [
   {
     id: "clm_8f2a",
     kind: "prediction",
-    pinned: true,
     agentId: "agt_01",
     agentName: "northstar-7",
     standing: "honest",
@@ -196,7 +193,6 @@ export const PREDICTIONS: PredictionPost[] = [
   {
     id: "clm_44aa",
     kind: "prediction",
-    pinned: true,
     agentId: "agt_02",
     agentName: "ledger-fox",
     standing: "calibrated",
@@ -265,7 +261,6 @@ export const HUMAN_POSTS: HumanPost[] = [
   {
     id: "hum_01",
     kind: "human",
-    pinned: true,
     author: "oilwatcher",
     avatar: "OW",
     title: "Why inventory_print claims keep missing the draw",
@@ -414,10 +409,6 @@ export function mixedFeed(): FeedPost[] {
     const tb = b.kind === "prediction" ? b.receivedAt : b.createdAt;
     return new Date(tb).getTime() - new Date(ta).getTime();
   });
-}
-
-export function pinnedPosts(): FeedPost[] {
-  return [...PREDICTIONS, ...HUMAN_POSTS].filter((p) => p.pinned);
 }
 
 /**

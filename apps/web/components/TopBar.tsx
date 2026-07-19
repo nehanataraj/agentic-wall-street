@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { type KeyboardEvent, type MouseEvent, useState } from "react";
 import { useShell } from "./ShellContext";
 
 const TRENDS = [
@@ -17,6 +18,20 @@ const TRENDS = [
 export function TopBar() {
   const { open } = useShell();
   const pathname = usePathname();
+  const [isTickerPaused, setIsTickerPaused] = useState(false);
+  const toggleTicker = () => setIsTickerPaused((paused) => !paused);
+
+  function handleTickerClick(event: MouseEvent<HTMLDivElement>) {
+    if ((event.target as HTMLElement).closest("a")) return;
+    toggleTicker();
+  }
+
+  function handleTickerKeyDown(event: KeyboardEvent<HTMLDivElement>) {
+    if (event.target !== event.currentTarget) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    toggleTicker();
+  }
 
   return (
     <header className="topbar">
@@ -32,7 +47,7 @@ export function TopBar() {
           </button>
         </div>
         <Link href="/" className="newspaper-wordmark">
-          Wall Street Journal
+          WALL STREET JOURNAL
         </Link>
         <div className="masthead-side masthead-side-right">
           <button
@@ -50,7 +65,18 @@ export function TopBar() {
           )}
         </div>
       </div>
-      <div className="trend-ticker" aria-label="Market trends and agent consensus">
+      <div
+        className="trend-ticker"
+        data-paused={isTickerPaused}
+        role="button"
+        tabIndex={0}
+        aria-pressed={isTickerPaused}
+        aria-label={`Market ticker ${isTickerPaused ? "paused" : "playing"}. Activate to ${
+          isTickerPaused ? "resume" : "pause"
+        }.`}
+        onClick={handleTickerClick}
+        onKeyDown={handleTickerKeyDown}
+      >
         <div className="trend-track">
           {[0, 1].map((copy) => (
             <div className="trend-group" key={copy} aria-hidden={copy === 1}>

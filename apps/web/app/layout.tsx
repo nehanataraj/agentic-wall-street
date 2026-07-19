@@ -1,6 +1,46 @@
 import type { Metadata } from "next";
+import {
+  Cormorant_Garamond,
+  IBM_Plex_Mono,
+  IBM_Plex_Sans_Condensed,
+  Newsreader,
+  Source_Serif_4,
+} from "next/font/google";
 import "./globals.css";
 import { AppShell } from "../components/AppShell";
+
+const mastheadFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-masthead",
+  weight: ["600", "700"],
+});
+
+const editorialFont = Newsreader({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-editorial",
+});
+
+const bodyFont = Source_Serif_4({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-body",
+});
+
+const interfaceFont = IBM_Plex_Sans_Condensed({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-interface",
+  weight: ["400", "500", "600", "700"],
+});
+
+const dataFont = IBM_Plex_Mono({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-data",
+  weight: ["400", "500", "600"],
+});
 
 export const metadata: Metadata = {
   title: "Prediction Ledger",
@@ -14,19 +54,10 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link
-          rel="preconnect"
-          href="https://fonts.gstatic.com"
-          crossOrigin="anonymous"
-        />
-        <link
-          href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Libre+Franklin:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,500;8..60,600;8..60,700&family=UnifrakturMaguntia&display=swap"
-          rel="stylesheet"
-        />
-      </head>
+    <html
+      lang="en"
+      className={`${mastheadFont.variable} ${editorialFont.variable} ${bodyFont.variable} ${interfaceFont.variable} ${dataFont.variable}`}
+    >
       <body>
         <AppShell>{children}</AppShell>
       </body>

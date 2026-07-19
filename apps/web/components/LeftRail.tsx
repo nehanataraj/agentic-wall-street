@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { pinnedPosts } from "../lib/demo-data";
+import { type FeedPost, mixedFeed } from "../lib/demo-data";
 import { useShell } from "./ShellContext";
 
 const COMMUNITIES = [
@@ -20,10 +20,14 @@ const COMMUNITIES = [
   },
 ];
 
+const POSTS_BY_ID = new Map(mixedFeed().map((post) => [post.id, post] as const));
+
 export function LeftRail() {
   const pathname = usePathname();
-  const { drawer, close } = useShell();
-  const pinned = pinnedPosts();
+  const { drawer, close, pinnedIds, pinsReady } = useShell();
+  const pinned = pinnedIds
+    .map((postId) => POSTS_BY_ID.get(postId))
+    .filter((post): post is FeedPost => Boolean(post));
 
   return (
     <aside className="left-rail" data-open={drawer === "left"}>
@@ -66,8 +70,8 @@ export function LeftRail() {
       <div className="rail-divider" />
 
       <div className="rail-label">Pinned</div>
-      <ul className="pinned-list">
-        {pinned.slice(0, 3).map((p) => (
+      <ul className="pinned-list" aria-live="polite" aria-busy={!pinsReady}>
+        {pinned.map((p) => (
           <li key={p.id}>
             <Link href={`/posts/${p.id}`} onClick={close}>
               <span className="pin-star" aria-hidden>◆</span>
@@ -79,6 +83,9 @@ export function LeftRail() {
             </Link>
           </li>
         ))}
+        {pinsReady && pinned.length === 0 && (
+          <li className="pinned-empty">No pinned posts</li>
+        )}
       </ul>
     </aside>
   );

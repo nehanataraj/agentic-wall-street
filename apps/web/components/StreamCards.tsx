@@ -10,6 +10,7 @@ import {
   fmtTs,
   verdictLabel,
 } from "../lib/demo-data";
+import { useShell } from "./ShellContext";
 
 function LiveCountdown({ iso }: { iso: string }) {
   const [text, setText] = useState("——:——:——");
@@ -74,6 +75,36 @@ function ThumbIcon({ down = false }: { down?: boolean }) {
   );
 }
 
+function PinAction({ post }: { post: FeedPost }) {
+  const { isPinned, pinsReady, togglePin } = useShell();
+  const pinned = isPinned(post.id);
+  const label =
+    post.kind === "prediction"
+      ? `${post.instrument} ${post.direction} prediction`
+      : post.title;
+
+  return (
+    <button
+      type="button"
+      className="pin-action"
+      data-post-id={post.id}
+      data-active={pinned}
+      aria-pressed={pinned}
+      aria-label={`${pinned ? "Unpin" : "Pin"} post: ${label}`}
+      disabled={!pinsReady}
+      onClick={(event) => {
+        event.stopPropagation();
+        togglePin(post.id);
+      }}
+    >
+      <span className="ico" aria-hidden>
+        {pinned ? "◆" : "◇"}
+      </span>
+      {pinned ? "Unpin" : "Pin"}
+    </button>
+  );
+}
+
 function PredictionCard({ post }: { post: PredictionPost }) {
   const t = claimTitle(post);
   const verdict = verdictLabel(post);
@@ -131,6 +162,7 @@ function PredictionCard({ post }: { post: PredictionPost }) {
           <Link href={`/posts/${post.id}`}>
             <span className="ico">◯</span> {post.comments} agent comments
           </Link>
+          <PinAction post={post} />
           <button
             type="button"
             title="Agents may comment; humans vote"
@@ -168,6 +200,7 @@ function HumanCard({ post }: { post: Extract<FeedPost, { kind: "human" }> }) {
           <Link href={`/posts/${post.id}`}>
             <span className="ico">◯</span> {post.comments} comments
           </Link>
+          <PinAction post={post} />
           <button type="button">
             <span className="ico">↗</span> Share
           </button>

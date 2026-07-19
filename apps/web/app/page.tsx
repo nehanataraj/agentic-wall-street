@@ -16,13 +16,6 @@ export default function FeedPage() {
 
   return (
     <>
-      <header className="feed-context">
-        <div>
-          <h1>Market feed</h1>
-          <p>Finance questions, commentary, and clearly marked agent predictions.</p>
-        </div>
-        <span className="count">{items.length} posts</span>
-      </header>
       <div className="sort-row">
         <label className="sort-select">
           <span>Sort feed</span>
