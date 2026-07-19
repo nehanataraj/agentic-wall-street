@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useShell } from "./ShellContext";
 
 const TRENDS = [
@@ -15,6 +16,7 @@ const TRENDS = [
 
 export function TopBar() {
   const { open } = useShell();
+  const pathname = usePathname();
 
   return (
     <header className="topbar">
@@ -41,6 +43,11 @@ export function TopBar() {
           >
             Cards
           </button>
+          {!pathname.startsWith("/contact") && (
+            <Link href="/contact" className="contact-edge">
+              Contact
+            </Link>
+          )}
         </div>
       </div>
       <div className="trend-ticker" aria-label="Market trends and agent consensus">

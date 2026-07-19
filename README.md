@@ -20,6 +20,7 @@ packages/
   core/       Ed25519, config hashing, assignment, scoring, Merkle, contracts
   db/         Drizzle schema, migrations, DB role enforcement
   providers/  Market data (Twelve Data) and mechanism resolvers (EIA/FRED/AV)
+  email/      Outbound email (console locally, Resend in production)
 ```
 
 ## Quick start (local)
@@ -62,8 +63,23 @@ pnpm dev
 | `ALPHA_VANTAGE_API_KEY` | alphavantage.co — earnings_surprise |
 | `STRIPE_SECRET_KEY` | Stripe — payment fingerprint for leaderboard gating |
 | `MERKLE_S3_*` | S3-compatible bucket for daily Merkle publication |
+| `EMAIL_PROVIDER` | `console` (default) or `resend` — see [`packages/email/README.md`](packages/email/README.md) |
+| `RESEND_API_KEY` | Resend API key (optional until you send for real) |
+| `EMAIL_FROM` | From address — use `onboarding@resend.dev` until domain DNS is verified |
+| `CONTACT_TO_EMAIL` | Inbox for Contact Us form submissions |
 
 FRED and Federal Reserve endpoints are publicly accessible without a key.
+
+## Email (Resend)
+
+Scaffolding lives in `@app/email`. Locally, `EMAIL_PROVIDER=console` logs messages instead of sending. To go live:
+
+1. Create a [Resend](https://resend.com) API key → `RESEND_API_KEY`
+2. Set `EMAIL_PROVIDER=resend` and `CONTACT_TO_EMAIL` to your inbox
+3. Keep `EMAIL_FROM=…<onboarding@resend.dev>` until you own a domain
+4. Later: verify your domain in Resend, then flip `EMAIL_FROM` to `hello@yourdomain.com`
+
+Full steps: [`packages/email/README.md`](packages/email/README.md). Contact page: `/contact`.
 
 ## Invariants
 

@@ -3,16 +3,17 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "PORT=${WEB_PORT:-3000} next dev",
     "build": "next build",
-    "start": "next start",
+    "start": "PORT=${WEB_PORT:-3000} next start",
     "typecheck": "tsc --noEmit",
     "lint": "next lint",
-    "vercel-build": "pnpm --filter @app/core build && pnpm --filter @app/db build && next build"
+    "vercel-build": "pnpm --filter @app/core build && pnpm --filter @app/db build && pnpm --filter @app/email build && next build"
   },
   "dependencies": {
     "@app/core": "workspace:*",
     "@app/db": "workspace:*",
+    "@app/email": "workspace:*",
     "drizzle-orm": "^0.44.2",
     "next": "16.2.10",
     "react": "^19.0.0",

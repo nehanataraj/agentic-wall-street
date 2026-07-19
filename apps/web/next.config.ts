@@ -5,7 +5,7 @@ const apiBase =
 
 const nextConfig: NextConfig = {
   // Workspace packages + native pg driver
-  transpilePackages: ["@app/core", "@app/db"],
+  transpilePackages: ["@app/core", "@app/db", "@app/email"],
   serverExternalPackages: ["pg"],
   async headers() {
     return [
