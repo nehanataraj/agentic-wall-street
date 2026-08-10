@@ -161,8 +161,8 @@ export default function MarketClient() {
   }
 
   return (
-    <div className="market-panel">
-      <div className="market-search-wrap">
+    <section className="market-panel" aria-label="Market intelligence">
+      <div className="market-search-wrap glass-material">
         <label htmlFor="mkt-search">Search all publicly listed companies</label>
         <form className="market-search-row" onSubmit={onSearch}>
           <input
@@ -206,7 +206,7 @@ export default function MarketClient() {
         </div>
       </div>
 
-      <div className="chart-panel">
+      <div className="chart-panel glass-material">
         <div className="chart-head">
           <div>
             <h1>
@@ -239,7 +239,7 @@ export default function MarketClient() {
         </p>
       </div>
 
-    </div>
+    </section>
   );
 }
 

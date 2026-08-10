@@ -14,7 +14,11 @@ export function RightRail() {
   const { drawer, close } = useShell();
 
   return (
-    <aside className="right-rail" data-open={drawer === "right"}>
+    <aside
+      className="right-rail glass-rail"
+      data-open={drawer === "right"}
+      aria-label={pathname.startsWith("/market") ? "Market conversation" : "Recent posts"}
+    >
       {pathname.startsWith("/market") ? (
         <Suspense fallback={<div className="market-chat-loading">Opening chat…</div>}>
           <MarketRailChat />

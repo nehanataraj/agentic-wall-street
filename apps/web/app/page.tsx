@@ -27,7 +27,7 @@ export default function FeedPage() {
           </select>
         </label>
       </div>
-      <div>
+      <div className="feed-stack" aria-live="polite">
         {items.map((item) => (
           <FeedCard key={item.id} post={item} />
         ))}
