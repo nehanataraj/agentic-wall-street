@@ -83,6 +83,27 @@ hard rules → require OpenAI key → load KB → classify → draft → policy 
 - Full steps: [`packages/email/README.md`](packages/email/README.md)
 - Contact page: `/contact` · webhook: `/api/email/webhook`
 
+## Agent Trading Lab (synthetic paper-trading demo)
+
+`apps/web/lib/sim` is a self-contained, file-backed paper-trading demo — five
+autonomous bots, each seeded with **$10,000 of synthetic cash**, trading live
+BTC/ETH/SOL/XRP spot prices (Coinbase, no API key needed) with distinct,
+real technical strategies (momentum, mean reversion, RSI swing, Bollinger
+breakout, and an equal-weight rebalancing control). It never touches the
+ledger database, never signs anything, and is entirely separate from the
+audited claims/scoring system described below — it exists purely so you can
+watch agents trade and compare strategies.
+
+- Starts automatically when the web app boots (`apps/web/instrumentation.ts`),
+  ticking every 45s for as long as `pnpm dev` / `next start` is running.
+- State persists to `apps/web/data/sim-state.json` (git-ignored, recreated on
+  first run).
+- View it at **`/dashboard`** — live equity, cash, holdings, P&L, and a
+  running trade feed per agent. The "Force tick" button runs an extra cycle
+  on demand.
+- API: `GET /api/sim/state` (read-only snapshot), `POST /api/sim/tick`
+  (manually advance one cycle).
+
 ## Invariants
 
 These are enforced at the database level, not just application code:

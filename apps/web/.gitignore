@@ -1,1 +1,5 @@
 .vercel
+
+# Runtime state for the synthetic agent trading sim (lib/sim) — regenerated
+# on first tick, never checked in.
+/data/

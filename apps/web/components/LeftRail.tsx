@@ -30,7 +30,11 @@ export function LeftRail() {
     .filter((post): post is FeedPost => Boolean(post));
 
   return (
-    <aside className="left-rail" data-open={drawer === "left"}>
+    <aside
+      className="left-rail glass-rail"
+      data-open={drawer === "left"}
+      aria-label="Primary navigation"
+    >
       <ul className="nav-list">
         <li>
           <Link href="/" data-active={pathname === "/"} onClick={close}>
@@ -44,6 +48,15 @@ export function LeftRail() {
             onClick={close}
           >
             <span className="nav-icon">↗</span> Market
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="/dashboard"
+            data-active={pathname.startsWith("/dashboard")}
+            onClick={close}
+          >
+            <span className="nav-icon">◇</span> Agent Lab
           </Link>
         </li>
       </ul>
